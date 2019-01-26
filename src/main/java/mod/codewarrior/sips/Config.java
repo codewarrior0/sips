@@ -28,11 +28,13 @@ public class Config {
         @Comment({"Unlisted fluids will deal damage if they are too hot or cold."})
         public static boolean temperatureDamage = true;
 
-        public static class Compat {
+        public static Compat compat = new Compat();
+
+        public static class Compat extends Object {
             @Comment({"Sipping Thermal Foundation fluids will apply their potion effects. Resonant Ender will randomly teleport the drinker."})
-            public static boolean thermalFoundation = true;
+            public boolean thermalFoundation = true;
             @Comment({"Sipping Thermal Expansion potion fluids will apply their potion effects."})
-            public static boolean thermalExpansion = true;
+            public boolean thermalExpansion = true;
 
         }
 
@@ -45,7 +47,7 @@ public class Config {
     public static void preInit(FMLPreInitializationEvent event)
     {
         onConfigUpdate();
-        if(SipsConfig.Compat.thermalFoundation) {
+        if(SipsConfig.compat.thermalFoundation) {
             addThermalFluids();
         }
     }

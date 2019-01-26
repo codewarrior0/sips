@@ -214,7 +214,7 @@ public class SipsItem extends ItemFood {
         }
 
         /* ThermalExpansion potion fluids */
-        if (SipsConfig.Compat.thermalExpansion && drank.tag != null && drank.tag.hasKey("Potion")) {
+        if (SipsConfig.compat.thermalExpansion && drank.tag != null && drank.tag.hasKey("Potion")) {
             String potionName = drank.tag.getString("Potion");
             PotionType potionType = potionName.length() == 0 ? null : PotionType.getPotionTypeForName(potionName);
             if (potionType != null) {
