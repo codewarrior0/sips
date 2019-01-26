@@ -1,120 +1,111 @@
 package mod.codewarrior.sips;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.config.Config.Comment;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class Config {
 
-    public static Map<String, FluidStats> stats = new HashMap<>();
+    public static Map<String, Sippable> stats = new HashMap<>();
 
-    public static class FluidStats {
-        public static final FluidStats UNDEFINED = new FluidStats("", 0, 0, 0, null, 0, 0);
-
-        public String fluidName;
-        public int shanks;
-        public float saturation;
-        public float damage = 0.0f;
-        public String potionName;
-        public int potionDuration;
-        public int potionLevel;
-
-        public FluidStats(String fluidName, int shanks, float saturation, float damage, String potionName, int potionDuration, int potionLevel) {
-            this.fluidName = fluidName;
-            this.shanks = shanks;
-            this.saturation = saturation;
-            this.damage = damage;
-            this.potionName = potionName;
-            this.potionDuration = potionDuration;
-            this.potionLevel = potionLevel;
-        }
-
-        public static FluidStats fromConfig(String configLine) {
-            List<String> fields = Arrays.stream(configLine.split(",")).map(String::trim).collect(Collectors.toList());
-            if (fields.size() < 3) {
-                SipsMod.logger.error("Not enough fields in fluid stats line '%s'", configLine);
-                return null;
-            }
-            String fluidName = fields.get(0);
-            int shanks;
-            float saturation;
-            float damage = 0.0f;
-            String potionName = null;
-            int potionDuration = 0;
-            int potionLevel = 0;
-
-            try {
-                shanks = Integer.parseInt(fields.get(1));
-            } catch (NumberFormatException e) {
-                SipsMod.logger.error("Could not parse integer '%s' in fluid stats line '%s'", fields.get(1), configLine);
-                return null;
-            }
-            try {
-                saturation = Float.parseFloat(fields.get(2));
-            } catch (NumberFormatException e) {
-                SipsMod.logger.error("Could not parse float '%s' in fluid stats line '%s'", fields.get(2), configLine);
-                return null;
-            }
-
-            if(fields.size() > 3) {
-                try {
-                    damage = Float.parseFloat(fields.get(3));
-                } catch (NumberFormatException e) {
-                    SipsMod.logger.error("Could not parse float '%s' in fluid stats line '%s'", fields.get(3), configLine);
-                    return null;
-                }
-            }
-
-            if(fields.size() > 4) {
-                potionName = fields.get(4);
-            }
-
-            if(fields.size() > 5) {
-                try {
-                    potionDuration = Integer.parseInt(fields.get(5));
-                } catch (NumberFormatException e) {
-                    SipsMod.logger.error("Could not parse integer '%s' in fluid stats line '%s'", fields.get(5), configLine);
-                    return null;
-                }
-            }
-
-            if(fields.size() > 6) {
-                try {
-                    potionLevel = Integer.parseInt(fields.get(6));
-                } catch (NumberFormatException e) {
-                    SipsMod.logger.error("Could not parse integer '%s' in fluid stats line '%s'", fields.get(6), configLine);
-                    return null;
-                }
-            }
-
-            return new FluidStats(fluidName, shanks, saturation, damage, potionName, potionDuration, potionLevel);
-        }
-    }
     @net.minecraftforge.common.config.Config(modid = SipsMod.MODID)
     public static class SipsConfig {
-        @Comment({"Drinkable fluids. Format: fluid_name, half-shanks (0-20), saturation (0.0-1.0)[, damage[, potion_name, potion_duration[, potion_level]]]" +
-                "\nUnlisted fluids will have zero food value and will deal damage if they are too hot or cold."})
+        @Comment({"Drinkable fluids. Format: fluid_name, half-shanks (0-20), saturation (0.0-1.0) [, damage [, potion_name, potion_duration, potion_level] ... ]"})
         public static String[] sips = new String[]{"water, 0, 0.0", "lava, 0, 0.0, 1000", "mushroom_stew, 6, 0.6"};
+        @Comment({"Unlisted fluids will deal damage if they are too hot or cold."})
+        public static boolean temperatureDamage = true;
 
+        public static class Compat {
+            @Comment({"Sipping Thermal Foundation fluids will apply their potion effects. Resonant Ender will randomly teleport the drinker."})
+            public static boolean thermalFoundation = true;
+            @Comment({"Sipping Thermal Expansion potion fluids will apply their potion effects."})
+            public static boolean thermalExpansion = true;
+
+        }
+
+    }
+
+    public static void put(Sippable stats) {
+        Config.stats.put(stats.fluidName, stats);
     }
 
     public static void preInit(FMLPreInitializationEvent event)
     {
         onConfigUpdate();
+        if(SipsConfig.Compat.thermalFoundation) {
+            addThermalFluids();
+        }
+    }
+
+    public static void addThermalFluids() {
+        put(new Sippable("aerotheum", 0, 0, 0, ImmutableList.of(
+                new Sippable.Effect("levitation", 30 * 20, 0))));
+
+        put(new Sippable("cryotheum", 0, 0, 15, ImmutableList.of(
+                new Sippable.Effect("slowness", 30 * 20, 1),
+                new Sippable.Effect("mining_fatigue", 30 * 20, 1))));
+
+        put(new Sippable("ender") {
+            @Override
+            public void onSipped(FluidStack drank, World world, EntityPlayer player) {
+                BlockPos randPos = player.getPosition().add(-8 + world.rand.nextInt(17), world.rand.nextInt(8), -8 + world.rand.nextInt(17));
+
+                if (!world.getBlockState(randPos).getMaterial().isSolid()) {
+                    player.setPosition(randPos.getX(), randPos.getY(), randPos.getZ());
+                    player.playSound(SoundEvents.ENTITY_ENDERMEN_TELEPORT, 1.0F, 1.0F);
+
+                }
+            }
+        });
+
+        put(new Sippable("glowstone", 0, 0, 15, ImmutableList.of(
+                new Sippable.Effect("speed", 30 * 20, 0),
+                new Sippable.Effect("jump_boost", 30 * 20, 0),
+                new Sippable.Effect("glowing", 2 * 60 * 20, 0)
+        )));
+
+        put(new Sippable("mana") {
+            @Override
+            public void onSipped(FluidStack drank, World world, EntityPlayer player) {
+                BlockPos randPos = player.getPosition().add(-8 + world.rand.nextInt(17), world.rand.nextInt(8), -8 + world.rand.nextInt(17));
+
+                if (!world.getBlockState(randPos).getMaterial().isSolid()) {
+                    player.setPosition(randPos.getX(), randPos.getY(), randPos.getZ());
+                    player.playSound(SoundEvents.ENTITY_ENDERMEN_TELEPORT, 1.0F, 1.0F);
+
+                }
+            }
+        });
+
+        put(new Sippable("petrotheum", 0, 0, 15, ImmutableList.of(
+                new Sippable.Effect("haste", 30 * 20, 0)
+        )));
+
+        put(new Sippable("pyrotheum", 0, 0, 15));
+
+        put(new Sippable("redstone", 0, 0, 15, ImmutableList.of(
+                new Sippable.Effect("haste", 30 * 20, 0)
+        )));
+
     }
 
     private static void onConfigUpdate()
     {
-        Arrays.stream(SipsConfig.sips).map(FluidStats::fromConfig).filter(Objects::nonNull).forEachOrdered(stats -> {
-            Config.stats.put(stats.fluidName, stats);
+        Arrays.stream(SipsConfig.sips).map(Sippable::fromConfig).filter(Objects::nonNull).forEachOrdered(stats -> {
+            put(stats);
         });
     }
 }

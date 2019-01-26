@@ -1,6 +1,6 @@
 package mod.codewarrior.sips;
 
-import mod.codewarrior.sips.Config.FluidStats;
+import mod.codewarrior.sips.Config.SipsConfig;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -12,7 +12,6 @@ import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumRarity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -32,7 +31,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -173,29 +171,31 @@ public class SipsItem extends ItemFood {
         return stack;
     }
 
-    protected void onSipped(FluidStack drank, World worldIn, EntityPlayer player)
+    protected void onSipped(FluidStack drank, World world, EntityPlayer player)
     {
         String fluidName = drank.getFluid().getName();
-        FluidStats stats = Config.stats.get(fluidName);
+        Sippable stats = Config.stats.get(fluidName);
         float damage = 0;
 
         if (stats != null) {
             player.getFoodStats().addStats(stats.shanks, stats.saturation);
             damage = stats.damage;
-            if (stats.potionName != null) {
-                Potion potion = Potion.getPotionFromResourceLocation(stats.potionName);
-                if (potion != null) {
-                    player.addPotionEffect(new PotionEffect(potion, stats.potionDuration, stats.potionLevel));
+            for(Sippable.Effect e: stats.effects) {
+                PotionEffect effect = e.getEffect();
+                if (effect != null) {
+                    player.addPotionEffect(effect);
                 }
             }
+            stats.onSipped(drank, world, player);
         }
         else {
-            int kelvins = drank.getFluid().getTemperature();
-            if (kelvins > 320) {
-                damage = (kelvins - 320) / 10f;
-            }
-            else if (kelvins < 260) {
-                damage = (260 - kelvins) / 10f;
+            if (SipsConfig.temperatureDamage) {
+                int kelvins = drank.getFluid().getTemperature();
+                if (kelvins > 320) {
+                    damage = (kelvins - 320) / 10f;
+                } else if (kelvins < 260) {
+                    damage = (260 - kelvins) / 10f;
+                }
             }
         }
 
@@ -214,7 +214,7 @@ public class SipsItem extends ItemFood {
         }
 
         /* ThermalExpansion potion fluids */
-        if (drank.tag != null && drank.tag.hasKey("Potion")) {
+        if (SipsConfig.Compat.thermalExpansion && drank.tag != null && drank.tag.hasKey("Potion")) {
             String potionName = drank.tag.getString("Potion");
             PotionType potionType = potionName.length() == 0 ? null : PotionType.getPotionTypeForName(potionName);
             if (potionType != null) {
@@ -240,12 +240,12 @@ public class SipsItem extends ItemFood {
         return EnumAction.DRINK;
     }
 
-    public static FluidStats getFluidStats(ItemStack stack) {
+    public static Sippable getFluidStats(ItemStack stack) {
         FluidStack contents = FluidUtil.getFluidContained(stack);
         if(contents != null && contents.amount > 0) {
-            return Config.stats.getOrDefault(contents.getFluid().getName(), FluidStats.UNDEFINED);
+            return Config.stats.getOrDefault(contents.getFluid().getName(), Sippable.UNDEFINED);
         }
-        return FluidStats.UNDEFINED;
+        return Sippable.UNDEFINED;
     }
 
 
