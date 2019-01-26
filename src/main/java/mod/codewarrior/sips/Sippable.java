@@ -63,8 +63,10 @@ public class Sippable {
 
     public static Sippable fromConfig(String configLine) {
         List<String> fields = Arrays.stream(configLine.split(",")).map(String::trim).collect(Collectors.toList());
+        if (fields.size() == 0 || (fields.size() == 1 && fields.get(0).length() == 0)) return null;
+
         if (fields.size() < 3) {
-            SipsMod.logger.error("Not enough fields in fluid stats line '%s'", configLine);
+            SipsMod.logger.error("Not enough fields in fluid stats line '{}'", configLine);
             return null;
         }
         String fluidName = fields.get(0);
@@ -76,13 +78,13 @@ public class Sippable {
         try {
             shanks = Integer.parseInt(fields.get(1));
         } catch (NumberFormatException e) {
-            SipsMod.logger.error("Could not parse integer '%s' in fluid stats line '%s'", fields.get(1), configLine);
+            SipsMod.logger.error("Could not parse shanks integer '{}' in fluid stats line '{}'", fields.get(1), configLine);
             return null;
         }
         try {
             saturation = Float.parseFloat(fields.get(2));
         } catch (NumberFormatException e) {
-            SipsMod.logger.error("Could not parse float '%s' in fluid stats line '%s'", fields.get(2), configLine);
+            SipsMod.logger.error("Could not parse saturation float '{}' in fluid stats line '{}'", fields.get(2), configLine);
             return null;
         }
 
@@ -90,17 +92,18 @@ public class Sippable {
             try {
                 damage = Float.parseFloat(fields.get(3));
             } catch (NumberFormatException e) {
-                SipsMod.logger.error("Could not parse float '%s' in fluid stats line '%s'", fields.get(3), configLine);
+                SipsMod.logger.error("Could not parse damage float '{}' in fluid stats line '{}'", fields.get(3), configLine);
                 return null;
             }
         }
         List<Effect> effects = new ArrayList<>();
 
         if(fields.size() > 4) {
-            fields = fields.subList(0, 4);
+            fields = fields.subList(4, fields.size());
 
             while (fields.size() > 0) {
-                effects.add(parseEffect(fields, configLine));
+                Effect effect = parseEffect(fields, configLine);
+                if (effect != null) effects.add(effect);
             }
         }
         return new Sippable(fluidName, shanks, saturation, damage, effects);
@@ -115,18 +118,20 @@ public class Sippable {
 
         if (fields.size() > 0) {
             try {
-                duration = Integer.parseInt(fields.remove(0));
+                duration = Integer.parseInt(fields.get(0));
+                fields.remove(0);
             } catch (NumberFormatException e) {
-                SipsMod.logger.error("Could not parse integer '%s' in fluid stats line '%s'", fields.get(0), configLine);
+                SipsMod.logger.error("Could not parse potion duration integer '{}' in fluid stats line '{}'", fields.get(0), configLine);
                 return null;
             }
         }
 
         if (fields.size() > 0) {
             try {
-                level = Integer.parseInt(fields.remove(0));
+                level = Integer.parseInt(fields.get(0));
+                fields.remove(0);
             } catch (NumberFormatException e) {
-                SipsMod.logger.error("Could not parse integer '%s' in fluid stats line '%s'", fields.get(0), configLine);
+                SipsMod.logger.error("Could not parse potion level integer '{}' in fluid stats line '{}'", fields.get(0), configLine);
                 return null;
             }
         }
