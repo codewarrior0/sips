@@ -199,13 +199,16 @@ public class SipsItem extends ItemFood {
             }
         }
 
-        if (damage != 0) {
+        if (damage > 0) {
             player.attackEntityFrom(new DamageSource("sip") {
                 @Override
                 public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn) {
                     return new TextComponentTranslation("death.sipped", entityLivingBaseIn.getDisplayName(), drank.getLocalizedName());
                 }
             }.setDamageBypassesArmor(), damage);
+        }
+        else if (damage < 0) {
+            player.heal(-damage);
         }
 
         if (fluidName.equals("milk")) {
