@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "sips:big_chug"
+  },
+  "pattern": [
+    "III",
+    "B B",
+    "BBB"
+  ],
+  "key": {
+    "I": {
+      "type": "forge:ore_dict",
+      "ore": "#ingotIron"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    }
+  }
+}

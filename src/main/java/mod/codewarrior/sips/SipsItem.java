@@ -1,5 +1,6 @@
 package mod.codewarrior.sips;
 
+import mod.codewarrior.sips.Config.FluidStats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -12,22 +13,26 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionType;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -43,13 +48,15 @@ import java.util.List;
 import static net.minecraftforge.fluids.capability.CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
 import static net.minecraftforge.fluids.capability.CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY;
 
-public class SipsItem extends Item {
+public class SipsItem extends ItemFood {
 
     public final int maxCapacity;
     public final int SIP = 250;
     public final int itemUseDuration;
 
     public SipsItem(String name, int capacity, int duration) {
+        super(0, 0, false);
+
         this.setCreativeTab(CreativeTabs.MISC);
         this.setUnlocalizedName("sips." + name);
         this.setRegistryName(name);
@@ -88,7 +95,8 @@ public class SipsItem extends Item {
             FluidStack milked;
             if (target instanceof EntityMooshroom) {
                 milked = new FluidStack(SipsMod.fluidMushroomStew, 1000);
-            } else {
+            }
+            else {
                 milked = new FluidStack(SipsMod.fluidMilk, 1000);
             }
 
@@ -104,27 +112,43 @@ public class SipsItem extends Item {
         return false;
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
-        ItemStack itemstack = playerIn.getHeldItem(handIn);
+        ItemStack itemstack = player.getHeldItem(hand);
+        ActionResult<ItemStack> result = new ActionResult<>(EnumActionResult.PASS, itemstack);
 
-        RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, true);
+        IFluidHandlerItem itemHandler = itemstack.getCapability(FLUID_HANDLER_ITEM_CAPABILITY, EnumFacing.DOWN);
+        if(itemHandler == null) return result;
+
+        RayTraceResult raytraceresult = this.rayTrace(world, player, true);
         if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK) {
-            boolean result = FluidUtil.interactWithFluidHandler(playerIn, handIn, worldIn, raytraceresult.getBlockPos(), raytraceresult.sideHit);
-            if (result) return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
-        }
+            IFluidHandler blockHandler = FluidUtil.getFluidHandler(world, raytraceresult.getBlockPos(), raytraceresult.sideHit);
 
-        IFluidHandlerItem cap = itemstack.getCapability(FLUID_HANDLER_ITEM_CAPABILITY, EnumFacing.DOWN);
-
-        if (cap != null) {
-            FluidStack drank = cap.drain(250, false);
-            if (drank != null && drank.amount == 250) {
-                playerIn.setActiveHand(handIn);
-                return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
+            FluidStack filled = FluidUtil.tryFluidTransfer(itemHandler, blockHandler, Integer.MAX_VALUE, true);
+            if(filled != null && filled.amount > 0) {
+                SoundEvent soundevent = filled.getFluid().getFillSound(filled);
+                player.world.playSound(null, player.posX, player.posY + 0.5, player.posZ, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                result = new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+            }
+            else {
+                FluidStack drained = FluidUtil.tryFluidTransfer(itemHandler, blockHandler, Integer.MAX_VALUE, true);
+                if(drained != null && drained.amount > 0) {
+                    SoundEvent soundevent = drained.getFluid().getEmptySound(drained);
+                    player.world.playSound(null, player.posX, player.posY + 0.5, player.posZ, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    result = new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+                }
             }
         }
 
-        return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
+        if (result.getType() == EnumActionResult.PASS) {
+            FluidStack drank = itemHandler.drain(250, false);
+            if (drank != null && drank.amount == 250) {
+                player.setActiveHand(hand);
+                result = new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -152,17 +176,12 @@ public class SipsItem extends Item {
     protected void onSipped(FluidStack drank, World worldIn, EntityPlayer player)
     {
         String fluidName = drank.getFluid().getName();
-        Config.FluidStats stats = Config.stats.get(fluidName);
+        FluidStats stats = Config.stats.get(fluidName);
+        float damage = 0;
+
         if (stats != null) {
             player.getFoodStats().addStats(stats.shanks, stats.saturation);
-            if (stats.damage > 0) {
-                player.attackEntityFrom(new DamageSource("sip") {
-                    @Override
-                    public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn) {
-                        return new TextComponentTranslation("death.sipped", entityLivingBaseIn.getDisplayName(), drank.getLocalizedName());
-                    }
-                }, stats.damage);
-            }
+            damage = stats.damage;
             if (stats.potionName != null) {
                 Potion potion = Potion.getPotionFromResourceLocation(stats.potionName);
                 if (potion != null) {
@@ -170,10 +189,44 @@ public class SipsItem extends Item {
                 }
             }
         }
+        else {
+            int kelvins = drank.getFluid().getTemperature();
+            if (kelvins > 320) {
+                damage = (kelvins - 320) / 10f;
+            }
+            else if (kelvins < 260) {
+                damage = (260 - kelvins) / 10f;
+            }
+        }
+
+        if (damage != 0) {
+            player.attackEntityFrom(new DamageSource("sip") {
+                @Override
+                public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn) {
+                    return new TextComponentTranslation("death.sipped", entityLivingBaseIn.getDisplayName(), drank.getLocalizedName());
+                }
+            }.setDamageBypassesArmor(), damage);
+        }
 
         if (fluidName.equals("milk")) {
             ItemStack fakeMilkBucket = new ItemStack(Items.MILK_BUCKET);
             player.curePotionEffects(fakeMilkBucket);
+        }
+
+        /* ThermalExpansion potion fluids */
+        if (drank.tag != null && drank.tag.hasKey("Potion")) {
+            String potionName = drank.tag.getString("Potion");
+            PotionType potionType = potionName.length() == 0 ? null : PotionType.getPotionTypeForName(potionName);
+            if (potionType != null) {
+                for (PotionEffect effect : potionType.getEffects()) {
+                    if (effect.getPotion().isInstant()) {
+                        effect.getPotion().affectEntity(player, player, player, effect.getAmplifier(), 1.0D);
+                    }
+                    else {
+                        player.addPotionEffect(new PotionEffect(effect));
+                    }
+                }
+            }
         }
     }
 
@@ -187,6 +240,14 @@ public class SipsItem extends Item {
         return EnumAction.DRINK;
     }
 
+    public static FluidStats getFluidStats(ItemStack stack) {
+        FluidStack contents = FluidUtil.getFluidContained(stack);
+        if(contents != null && contents.amount > 0) {
+            return Config.stats.get(contents.getFluid().getName());
+        }
+        return FluidStats.UNDEFINED;
+    }
+
 
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt)
@@ -194,5 +255,37 @@ public class SipsItem extends Item {
         if(!stack.isEmpty())
             return new FluidHandlerItemStack(stack, maxCapacity);
         return null;
+    }
+
+    /* ItemFood overrides */
+
+    @Override
+    protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player) {
+        throw new RuntimeException("Can't get here.");
+    }
+
+    @Override
+    public int getHealAmount(ItemStack stack) {
+        return getFluidStats(stack).shanks;
+    }
+
+    @Override
+    public float getSaturationModifier(ItemStack stack) {
+        return getFluidStats(stack).saturation;
+    }
+
+    @Override
+    public boolean isWolfsFavoriteMeat() {
+        return false;
+    }
+
+    @Override
+    public ItemFood setPotionEffect(PotionEffect effect, float probability) {
+        throw new RuntimeException("Can't get here.");
+    }
+
+    @Override
+    public ItemFood setAlwaysEdible() {
+        throw new RuntimeException("Can't get here.");
     }
 }

@@ -17,6 +17,8 @@ public class Config {
     public static Map<String, FluidStats> stats = new HashMap<>();
 
     public static class FluidStats {
+        public static final FluidStats UNDEFINED = new FluidStats("", 0, 0, 0, null, 0, 0);
+
         public String fluidName;
         public int shanks;
         public float saturation;
