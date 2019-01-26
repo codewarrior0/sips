@@ -123,19 +123,19 @@ public class SipsItem extends ItemFood {
         RayTraceResult raytraceresult = this.rayTrace(world, player, true);
         if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK) {
             IFluidHandler blockHandler = FluidUtil.getFluidHandler(world, raytraceresult.getBlockPos(), raytraceresult.sideHit);
-
-            FluidStack filled = FluidUtil.tryFluidTransfer(itemHandler, blockHandler, Integer.MAX_VALUE, true);
-            if(filled != null && filled.amount > 0) {
-                SoundEvent soundevent = filled.getFluid().getFillSound(filled);
-                player.world.playSound(null, player.posX, player.posY + 0.5, player.posZ, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                result = new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
-            }
-            else {
-                FluidStack drained = FluidUtil.tryFluidTransfer(itemHandler, blockHandler, Integer.MAX_VALUE, true);
-                if(drained != null && drained.amount > 0) {
-                    SoundEvent soundevent = drained.getFluid().getEmptySound(drained);
+            if(blockHandler != null) {
+                FluidStack filled = FluidUtil.tryFluidTransfer(itemHandler, blockHandler, Integer.MAX_VALUE, true);
+                if (filled != null && filled.amount > 0) {
+                    SoundEvent soundevent = filled.getFluid().getFillSound(filled);
                     player.world.playSound(null, player.posX, player.posY + 0.5, player.posZ, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
                     result = new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+                } else {
+                    FluidStack drained = FluidUtil.tryFluidTransfer(itemHandler, blockHandler, Integer.MAX_VALUE, true);
+                    if (drained != null && drained.amount > 0) {
+                        SoundEvent soundevent = drained.getFluid().getEmptySound(drained);
+                        player.world.playSound(null, player.posX, player.posY + 0.5, player.posZ, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        result = new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+                    }
                 }
             }
         }
@@ -243,7 +243,7 @@ public class SipsItem extends ItemFood {
     public static FluidStats getFluidStats(ItemStack stack) {
         FluidStack contents = FluidUtil.getFluidContained(stack);
         if(contents != null && contents.amount > 0) {
-            return Config.stats.get(contents.getFluid().getName());
+            return Config.stats.getOrDefault(contents.getFluid().getName(), FluidStats.UNDEFINED);
         }
         return FluidStats.UNDEFINED;
     }
