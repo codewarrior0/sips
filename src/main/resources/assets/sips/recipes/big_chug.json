@@ -5,13 +5,17 @@
   },
   "pattern": [
     "III",
-    "B B",
+    "BDB",
     "BBB"
   ],
   "key": {
+    "D": {
+      "type": "forge:ore_dict",
+      "ore": "gemDiamond"
+    },
     "I": {
       "type": "forge:ore_dict",
-      "ore": "#ingotIron"
+      "ore": "ingotIron"
     },
     "B": {
       "item": "minecraft:bucket"
