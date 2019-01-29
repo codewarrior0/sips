@@ -168,6 +168,25 @@ public class SipsItem extends ItemFood {
             this.onSipped(drank, worldIn, entityplayer);
         }
 
+        if (SipsConfig.compat.slipChance > 0.0 && stack.hasTagCompound() && stack.getTagCompound().hasKey("oiled")) {
+            if(SipsConfig.compat.slipChance < worldIn.rand.nextFloat()) {
+                stack.getTagCompound().removeTag("oiled");
+                if (entityLiving instanceof EntityPlayer) {
+                    EntityPlayer player = (EntityPlayer) entityLiving;
+                    EnumHand hand = null;
+                    if (player.getHeldItem(EnumHand.MAIN_HAND) == stack) {
+                        hand = EnumHand.MAIN_HAND;
+                    } else if (player.getHeldItem(EnumHand.OFF_HAND) == stack) {
+                        hand = EnumHand.OFF_HAND;
+                    }
+                    if (hand != null) {
+                        player.dropItem(stack, false);
+                        return ItemStack.EMPTY;
+                    }
+                }
+            }
+        }
+
         return stack;
     }
 

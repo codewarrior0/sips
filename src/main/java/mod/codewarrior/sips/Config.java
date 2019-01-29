@@ -8,6 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
@@ -35,6 +36,8 @@ public class Config {
             public boolean thermalFoundation = true;
             @Comment({"Sipping Thermal Expansion potion fluids will apply their potion effects."})
             public boolean thermalExpansion = true;
+            @Comment({"If a Sip item is Olive Oiled via the Rustic mod, it will slip from the player's hand when drunk with this probability (0.0-1.0)"})
+            public float slipChance = 0.25f;
 
         }
 
@@ -49,6 +52,14 @@ public class Config {
         onConfigUpdate();
         if(SipsConfig.compat.thermalFoundation) {
             addThermalFluids();
+        }
+
+        if(Loader.isModLoaded("rustic")) {
+            try {
+                RusticCompat.addFluids();
+            } catch (Exception e) {
+                SipsMod.logger.error("Failed to initialize rustic compat", e);
+            }
         }
     }
 
@@ -92,13 +103,13 @@ public class Config {
             }
         });
 
-        put(new Sippable("petrotheum", 0, 0, 15, ImmutableList.of(
+        put(new Sippable("petrotheum", 0, 0, 5, ImmutableList.of(
                 new Sippable.Effect("haste", 30 * 20, 0)
         )));
 
         put(new Sippable("pyrotheum", 0, 0, 15));
 
-        put(new Sippable("redstone", 0, 0, 15, ImmutableList.of(
+        put(new Sippable("redstone", 0, 0, 5, ImmutableList.of(
                 new Sippable.Effect("haste", 30 * 20, 0)
         )));
 

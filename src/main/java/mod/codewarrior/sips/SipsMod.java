@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 
 import static net.minecraftforge.fluids.FluidRegistry.enableUniversalBucket;
 
-@Mod(modid = SipsMod.MODID, name = SipsMod.NAME, version = SipsMod.VERSION)
+@Mod(modid = SipsMod.MODID, name = SipsMod.NAME, version = SipsMod.VERSION, dependencies = "after:rustic;after:thermalfoundation;after:thermalexpansion")
 @Mod.EventBusSubscriber
 public class SipsMod
 {
