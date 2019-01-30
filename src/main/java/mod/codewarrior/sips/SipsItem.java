@@ -267,7 +267,11 @@ public class SipsItem extends ItemFood {
 
     public int getMaxItemUseDuration(ItemStack stack)
     {
-        return itemUseDuration;
+        FluidStack contents = FluidUtil.getFluidContained(stack);
+        if (contents != null && contents.amount > 0) {
+            return itemUseDuration;
+        }
+        return 0;
     }
 
     public EnumAction getItemUseAction(ItemStack stack)
