@@ -260,6 +260,11 @@ public class SipsItem extends ItemFood {
         }
     }
 
+    @Override
+    public int getItemStackLimit(ItemStack stack) {
+        return 1;
+    }
+
     public int getMaxItemUseDuration(ItemStack stack)
     {
         return itemUseDuration;
