@@ -25,14 +25,24 @@ public class Config {
     @net.minecraftforge.common.config.Config(modid = SipsMod.MODID)
     public static class SipsConfig {
         @Comment({"Drinkable fluids. Format: fluid_name, half-shanks (0-20), saturation (0.0-1.0) [, damage [, potion_name, potion_duration, potion_level] ... ]"})
-        public static String[] sips = new String[]{"water, 0, 0.0", "lava, 0, 0.0, 1000", "mushroom_stew, 6, 0.6"};
-        @Comment({"Unlisted fluids will deal damage if they are too hot or cold."})
-        public static boolean temperatureDamage = true;
+        public static String[] sips = new String[]{
+                "water, 0, 0.0", "lava, 0, 0.0, 1000",
+                "mushroom_stew, 6, 0.6",
+                "aerotheum, 0, 0, 1, minecraft:levitation, 30s, 0",
+                "glowstone, 0, 0, 1, minecraft:speed, 30s, 0, minecraft:jump_boost, 30s, 0, minecraft:glowing, 2m, 0",
+                "petrotheum, 0, 0, 1, minecraft:haste, 30s, 0",
+                "redstone, 0, 0, 1, minecraft:haste, 30s, 0",
+                "astralsorcery.liquidstarlight, 0, 0, 1, minecraft:night_vision, 2m, 0, minecraft:slowness, 30s, 0, minecraft:mining_fatigue, 30s, 0"
+        };
+        @Comment({"Unlisted fluids will deal this much damage per Kelvin above 320 or below 260. (Default fluid temperature: 300K; Lava: 1300K; Cryotheum: 50K"})
+        public static float temperatureDamagePerKelvin = 0.1f;
+        @Comment({"Unlisted fluids will set the player on fire or apply slowness and fatigue effects if they are too hot or cold."})
+        public static boolean temperatureEffects = true;
 
         public static Compat compat = new Compat();
 
         public static class Compat extends Object {
-            @Comment({"Sipping Thermal Foundation fluids will apply their potion effects. Resonant Ender will randomly teleport the drinker."})
+            @Comment({"Sipping Thermal Foundation's Resonant Ender or Primal Mana will randomly teleport the drinker."})
             public boolean thermalFoundation = true;
             @Comment({"Sipping Thermal Expansion potion fluids will apply their potion effects."})
             public boolean thermalExpansion = true;
@@ -64,13 +74,6 @@ public class Config {
     }
 
     public static void addThermalFluids() {
-        put(new Sippable("aerotheum", 0, 0, 0, ImmutableList.of(
-                new Sippable.Effect("levitation", 30 * 20, 0))));
-
-        put(new Sippable("cryotheum", 0, 0, 15, ImmutableList.of(
-                new Sippable.Effect("slowness", 30 * 20, 1),
-                new Sippable.Effect("mining_fatigue", 30 * 20, 1))));
-
         put(new Sippable("ender") {
             @Override
             public void onSipped(FluidStack drank, World world, EntityPlayer player) {
@@ -84,12 +87,6 @@ public class Config {
             }
         });
 
-        put(new Sippable("glowstone", 0, 0, 15, ImmutableList.of(
-                new Sippable.Effect("speed", 30 * 20, 0),
-                new Sippable.Effect("jump_boost", 30 * 20, 0),
-                new Sippable.Effect("glowing", 2 * 60 * 20, 0)
-        )));
-
         put(new Sippable("mana") {
             @Override
             public void onSipped(FluidStack drank, World world, EntityPlayer player) {
@@ -102,17 +99,6 @@ public class Config {
                 }
             }
         });
-
-        put(new Sippable("petrotheum", 0, 0, 5, ImmutableList.of(
-                new Sippable.Effect("haste", 30 * 20, 0)
-        )));
-
-        put(new Sippable("pyrotheum", 0, 0, 15));
-
-        put(new Sippable("redstone", 0, 0, 5, ImmutableList.of(
-                new Sippable.Effect("haste", 30 * 20, 0)
-        )));
-
     }
 
     private static void onConfigUpdate()

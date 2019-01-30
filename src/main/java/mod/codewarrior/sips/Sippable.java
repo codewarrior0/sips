@@ -118,7 +118,26 @@ public class Sippable {
 
         if (fields.size() > 0) {
             try {
-                duration = Integer.parseInt(fields.get(0));
+                int mult = 1;
+                String durationTxt = fields.get(0);
+                if(durationTxt.endsWith("s")) {
+                    mult = 20;
+                    durationTxt = durationTxt.substring(0, durationTxt.length()-1);
+                }
+                else if(durationTxt.endsWith("m")) {
+                    mult = 20 * 60;
+                    durationTxt = durationTxt.substring(0, durationTxt.length()-1);
+                }
+                else if(durationTxt.endsWith("h")) {
+                    mult = 20 * 60 * 60;
+                    durationTxt = durationTxt.substring(0, durationTxt.length()-1);
+                }
+                else if(durationTxt.endsWith("t")) { /* somebody might try this */
+                    mult = 1;
+                    durationTxt = durationTxt.substring(0, durationTxt.length()-1);
+                }
+
+                duration = Integer.parseInt(durationTxt) * mult;
                 fields.remove(0);
             } catch (NumberFormatException e) {
                 SipsMod.logger.error("Could not parse potion duration integer '{}' in fluid stats line '{}'", fields.get(0), configLine);

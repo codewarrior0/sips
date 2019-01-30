@@ -9,6 +9,7 @@ import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumRarity;
@@ -208,16 +209,23 @@ public class SipsItem extends ItemFood {
             stats.onSipped(drank, world, player);
         }
         else {
-            if (SipsConfig.temperatureDamage) {
-                int kelvins = drank.getFluid().getTemperature();
+            int kelvins = drank.getFluid().getTemperature();
+            if (SipsConfig.temperatureDamagePerKelvin != 0.0) {
                 if (kelvins > 320) {
-                    damage = (kelvins - 320) / 10f;
+                    damage = (kelvins - 320) * SipsConfig.temperatureDamagePerKelvin;
                 } else if (kelvins < 260) {
-                    damage = (260 - kelvins) / 10f;
+                    damage = (260 - kelvins) * SipsConfig.temperatureDamagePerKelvin;
+                }
+            }
+            if (SipsConfig.temperatureEffects) {
+                if (kelvins > 320) {
+                    player.setFire(30);
+                } else if (kelvins < 260) {
+                    player.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 30));
+                    player.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE, 30));
                 }
             }
         }
-
         if (damage > 0) {
             player.attackEntityFrom(new DamageSource("sip") {
                 @Override
