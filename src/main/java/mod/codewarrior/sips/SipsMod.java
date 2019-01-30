@@ -1,24 +1,16 @@
 package mod.codewarrior.sips;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
 
 import static net.minecraftforge.fluids.FluidRegistry.enableUniversalBucket;
@@ -31,13 +23,16 @@ public class SipsMod
     public static final String NAME = "Sips";
     public static final String VERSION = "1.0";
 
-    private static SipsItem lil_sip;
-    private static SipsItem big_chug;
+    public static SipsItem lil_sip;
+    public static SipsItem big_chug;
 
     public static Fluid fluidMilk;
     public static Fluid fluidMushroomStew;
 
     public static Logger logger;
+
+    @SidedProxy(clientSide = "mod.codewarrior.sips.ClientProxy", serverSide = "mod.codewarrior.sips.CommonProxy")
+    public static CommonProxy proxy;
 
 
     public static Fluid setupFluid(Fluid fluid)
@@ -73,28 +68,11 @@ public class SipsMod
                 )
         );
 
-        if(FMLLaunchHandler.side() == Side.CLIENT) {
-            initModel();
-        }
+        proxy.preInit();
 
         Config.preInit(event);
     }
 
-    public void initModel() {
-        ModelLoaderRegistry.registerLoader(SipsModel.SipsModelLoader.INSTANCE);
-
-        ModelLoader.registerItemVariants(lil_sip, SipsModel.SipsModelLoader.LIL_SIP);
-        ModelLoader.registerItemVariants(big_chug, SipsModel.SipsModelLoader.BIG_CHUG);
-    }
-
-    @SubscribeEvent
-    public static void onTextureStitch(TextureStitchEvent.Pre event)
-    {
-        TextureMap map = event.getMap();
-        for (ResourceLocation location : ImmutableList.of(fluidMilk.getStill(), fluidMilk.getFlowing(), fluidMushroomStew.getStill(), fluidMushroomStew.getFlowing())) {
-            map.registerSprite(location);
-        }
-    }
 
     @EventHandler
     public void init(FMLInitializationEvent event)
@@ -108,10 +86,7 @@ public class SipsMod
         event.getRegistry().register(lil_sip);
         event.getRegistry().register(big_chug);
 
-        if(FMLLaunchHandler.side() == Side.CLIENT) {
-            ModelLoader.setCustomMeshDefinition(lil_sip, stack -> SipsModel.SipsModelLoader.LIL_SIP);
-            ModelLoader.setCustomMeshDefinition(big_chug, stack -> SipsModel.SipsModelLoader.BIG_CHUG);
-        }
+        proxy.registerItems();
     }
 
 
