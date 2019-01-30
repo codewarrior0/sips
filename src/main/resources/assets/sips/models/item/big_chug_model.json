@@ -1,5 +1,5 @@
 {
-  "parent": "item/generated",
+  "parent": "sips:item/sip_base",
   "textures": {
     "layer0": "sips:items/big_chug"
   }

@@ -169,15 +169,6 @@ public class SipsModel implements IModel {
         @Override
         public Pair<? extends IBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
             Matrix4f matrix = this.base.handlePerspective(cameraTransformType).getRight();
-            if(cameraTransformType == ItemCameraTransforms.TransformType.HEAD) {
-                // tiny potato compat
-                Matrix4f scale = new Matrix4f();
-                scale.setIdentity();
-                scale.m00 = -1.0f;
-                scale.m22 = -1.0f;
-
-                matrix.mul(scale);
-            }
             return Pair.of(this, matrix);
         }
 

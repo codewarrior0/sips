@@ -1,0 +1,10 @@
+{
+  "parent": "item/handheld",
+  "display": {
+    "head": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 13, 7],
+      "scale": [1, 1, 1]
+    }
+  }
+}
