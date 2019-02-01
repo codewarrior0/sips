@@ -26,13 +26,22 @@ public class Config {
     public static class SipsConfig {
         @Comment({"Drinkable fluids. Format: fluid_name, half-shanks (0-20), saturation (0.0-1.0) [, damage [, potion_name, potion_duration, potion_level] ... ]"})
         public static String[] sips = new String[]{
-                "water, 0, 0.0", "lava, 0, 0.0, 1000",
-                "mushroom_stew, 6, 0.6",
+                "water, 0, 0",
+                "mushroom_stew, 6, 0.3",
                 "aerotheum, 0, 0, 1, minecraft:levitation, 30s, 0",
                 "glowstone, 0, 0, 1, minecraft:speed, 30s, 0, minecraft:jump_boost, 30s, 0, minecraft:glowing, 2m, 0",
                 "petrotheum, 0, 0, 1, minecraft:haste, 30s, 0",
                 "redstone, 0, 0, 1, minecraft:haste, 30s, 0",
-                "astralsorcery.liquidstarlight, 0, 0, 1, minecraft:night_vision, 2m, 0, minecraft:slowness, 30s, 0, minecraft:mining_fatigue, 30s, 0"
+                "astralsorcery.liquidstarlight, 0, 0, 1, minecraft:night_vision, 2m, 0, minecraft:slowness, 30s, 0, minecraft:mining_fatigue, 30s, 0",
+                "nutrient_distillation, 2, 0.1, 0",
+                //"ender_distillation, 0, 0, 0, "
+                "vapor_of_levity, 0, 0, 5, minecraft:levitation, 30s, 0",
+                "hootch, 1, 0.05, 1, minecraft:nausea, 30s, 0",
+                "rocket_fuel, 0, 0, 5, minecraft:speed, 30s, 1, minecraft:haste, 30s, 1",
+                "liquid_sunshine, 0, 0, 0, minecraft:glowing, 2m, 0",
+                "cloud_seed, 0, 0, 0, minecraft:slowness, 30s, 0",
+                "cloud_seed_concentrated, 0, 0, 0, minecraft:slowness, 2m, 1",
+                "for.honey, 3, 0.2, 0"
         };
         @Comment({"Unlisted fluids will deal this much damage per Kelvin above 320 or below 260. (Default fluid temperature: 300K; Lava: 1300K; Cryotheum: 50K"})
         public static float temperatureDamagePerKelvin = 0.1f;
