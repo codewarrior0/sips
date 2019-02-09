@@ -34,6 +34,11 @@ public class SipsMod
     @SidedProxy(clientSide = "mod.codewarrior.sips.ClientProxy", serverSide = "mod.codewarrior.sips.CommonProxy")
     public static CommonProxy proxy;
 
+    public static final ResourceLocation MILK_STILL = new ResourceLocation("sips:blocks/fluid/milk_still");
+    public static final ResourceLocation MILK_FLOW = new ResourceLocation("sips:blocks/fluid/milk_flow");
+    public static final ResourceLocation MUSHROOM_STEW_STILL = new ResourceLocation("sips:blocks/fluid/mushroom_stew_still");
+    public static final ResourceLocation MUSHROOM_STEW_FLOW = new ResourceLocation("sips:blocks/fluid/mushroom_stew_flow");
+
 
     public static Fluid setupFluid(Fluid fluid)
     {
@@ -57,14 +62,14 @@ public class SipsMod
 
         fluidMilk = setupFluid(
                 new Fluid("milk",
-                        new ResourceLocation("sips:blocks/fluid/milk_still"),
-                        new ResourceLocation("sips:blocks/fluid/milk_flow")
+                        MILK_STILL,
+                        MILK_FLOW
                 )
         );
         fluidMushroomStew = setupFluid(
                 new Fluid("mushroom_stew",
-                        new ResourceLocation("sips:blocks/fluid/mushroom_stew_still"),
-                        new ResourceLocation("sips:blocks/fluid/mushroom_stew_flow")
+                        MUSHROOM_STEW_STILL,
+                        MUSHROOM_STEW_FLOW
                 )
         );
 

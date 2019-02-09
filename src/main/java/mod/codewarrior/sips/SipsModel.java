@@ -19,10 +19,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.ItemTextureQuadConverter;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
-import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -35,36 +33,32 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class SipsModel implements IModel {
 
-    public static ResourceLocation LIL_SIP_MODEL = new ResourceLocation("sips:item/lil_sip_model");
-    public static ResourceLocation BIG_CHUG_MODEL = new ResourceLocation("sips:item/big_chug_model");
-    public static ResourceLocation LIL_SIP_MASK = new ResourceLocation("sips:items/lil_sip_mask");
-    public static ResourceLocation BIG_CHUG_MASK = new ResourceLocation("sips:items/big_chug_mask");
+    public static ResourceLocation LIL_SIP_MODEL = new ResourceLocation("sips:item/lil_sip_3d");
+    public static ResourceLocation BIG_CHUG_MODEL = new ResourceLocation("sips:item/big_chug_3d");
+    public static ResourceLocation FLUID_PLACEHOLDER = new ResourceLocation("sips:fluid_placeholder");
+    public static ResourceLocation FLUID_EMPTY = new ResourceLocation("sips:items/empty_fluid");
 
     public final IModel baseModel;
-    public final ResourceLocation maskTex;
 
     Fluid fluid;
 
-    public SipsModel(ResourceLocation modelLoc, ResourceLocation maskTex, Fluid fluid) throws Exception {
+    public SipsModel(ResourceLocation modelLoc, Fluid fluid) throws Exception {
         this.baseModel = ModelLoaderRegistry.getModel(modelLoc);
-        this.maskTex = maskTex;
         this.fluid = fluid;
     }
 
-    public SipsModel(IModel baseModel, ResourceLocation maskTex, Fluid fluid) {
+    public SipsModel(IModel baseModel, Fluid fluid) {
         this.baseModel = baseModel;
-        this.maskTex = maskTex;
         this.fluid = fluid;
     }
 
     @Override
     public Collection<ResourceLocation> getTextures() {
-        return new ImmutableList.Builder<ResourceLocation>().add(maskTex).addAll(baseModel.getTextures()).build();
+        return new ImmutableList.Builder<ResourceLocation>().add(FLUID_EMPTY).addAll(baseModel.getTextures()).build();
     }
 
     @Override
@@ -74,7 +68,7 @@ public class SipsModel implements IModel {
         if (fluid == null) {
             fluid = this.fluid;
         }
-        return new SipsModel(baseModel, maskTex, fluid);
+        return new SipsModel(baseModel, fluid);
     }
 
     private static final float NORTH_Z_FLUID = 7.498f / 16f;
@@ -82,25 +76,15 @@ public class SipsModel implements IModel {
 
     @Override
     public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
-        TRSRTransformation transform = state.apply(Optional.empty()).orElse(TRSRTransformation.identity());;
-        TextureAtlasSprite template = bakedTextureGetter.apply(maskTex);
         TextureAtlasSprite fluidSprite = null;
-
-        if (fluid != null) {
-            fluidSprite = bakedTextureGetter.apply(fluid.getStill());
-        }
 
         ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
 
         IBakedModel base = this.baseModel.bake(state, format,
-                bakedTextureGetter);
+                (loc) -> (loc.equals(FLUID_PLACEHOLDER)) ? bakedTextureGetter.apply(fluid != null ? fluid.getStill() : FLUID_EMPTY) : bakedTextureGetter.apply(loc));
 
         builder.addAll(base.getQuads(null, null, 0));
 
-        if (fluidSprite != null) {
-            builder.addAll(ItemTextureQuadConverter.convertTexture(format, transform, template, fluidSprite, NORTH_Z_FLUID, EnumFacing.NORTH, fluid.getColor()));
-            builder.addAll(ItemTextureQuadConverter.convertTexture(format, transform, template, fluidSprite, SOUTH_Z_FLUID, EnumFacing.SOUTH, fluid.getColor()));
-        }
         return new SipsBakedModel(this, base, state, builder.build(), fluidSprite, format);
     }
 
@@ -220,9 +204,9 @@ public class SipsModel implements IModel {
         @Override
         public IModel loadModel(ResourceLocation modelLocation) throws Exception {
             if (modelLocation.getResourcePath().equals("lil_sip"))
-                return new SipsModel(LIL_SIP_MODEL, LIL_SIP_MASK, null);
+                return new SipsModel(LIL_SIP_MODEL, null);
             if (modelLocation.getResourcePath().equals("big_chug"))
-                return new SipsModel(BIG_CHUG_MODEL, BIG_CHUG_MASK, null);
+                return new SipsModel(BIG_CHUG_MODEL, null);
             return null;
         }
     }

@@ -17,7 +17,11 @@ public class ClientProxy extends CommonProxy {
     public static void onTextureStitch(TextureStitchEvent.Pre event)
     {
         TextureMap map = event.getMap();
-        for (ResourceLocation location : ImmutableList.of(SipsMod.fluidMilk.getStill(), SipsMod.fluidMilk.getFlowing(), SipsMod.fluidMushroomStew.getStill(), SipsMod.fluidMushroomStew.getFlowing())) {
+        for (ResourceLocation location : ImmutableList.of(
+                SipsMod.MILK_STILL,
+                SipsMod.MILK_FLOW,
+                SipsMod.MUSHROOM_STEW_STILL,
+                SipsMod.MUSHROOM_STEW_FLOW)) {
             map.registerSprite(location);
         }
     }
