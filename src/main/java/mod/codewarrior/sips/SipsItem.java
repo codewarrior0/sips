@@ -74,10 +74,15 @@ public class SipsItem extends ItemFood {
             TextFormatting rarity = fs.getFluid().getRarity()== EnumRarity.COMMON?TextFormatting.GRAY: fs.getFluid().getRarity().rarityColor;
             int sips = fs.amount / SIP;
             list.add(rarity+fs.getLocalizedName()+TextFormatting.GRAY+": " + I18n.format("desc.sips.sips", sips) + " (" +fs.amount+"/"+ maxCapacity +"mB" + ")");
+
+            if (SipsConfig.compat.nutrition) {
+                NutritionCompat.addStackInformation(fs.getFluid().getName(), list);
+            }
         }
         else {
             list.add(I18n.format("desc.sips.empty"));
         }
+
     }
 
     @Override
@@ -196,9 +201,13 @@ public class SipsItem extends ItemFood {
         String fluidName = drank.getFluid().getName();
         Sippable stats = Config.stats.get(fluidName);
         float damage = 0;
+        int shanks = 0;
+        float saturation = 0;
 
         if (stats != null) {
-            player.getFoodStats().addStats(stats.shanks, stats.saturation);
+            shanks = stats.shanks;
+            saturation = stats.saturation;
+            player.getFoodStats().addStats(shanks, saturation);
             damage = stats.damage;
             for(Sippable.Effect e: stats.effects) {
                 PotionEffect effect = e.getEffect();
@@ -258,6 +267,14 @@ public class SipsItem extends ItemFood {
                 }
             }
         }
+
+        if (SipsConfig.compat.nutrition) {
+            try {
+                NutritionCompat.applyNutrition(player, fluidName, shanks);
+            } catch (Exception e) {
+                SipsMod.logger.error("Failed to apply Nutrition effects! Update both Sips and Nutrition, then report this error to Sips if it occurs again.", e);
+            }
+        }
     }
 
     @Override
@@ -286,7 +303,6 @@ public class SipsItem extends ItemFood {
         }
         return Sippable.UNDEFINED;
     }
-
 
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt)

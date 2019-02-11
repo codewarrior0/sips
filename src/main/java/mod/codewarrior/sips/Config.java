@@ -58,6 +58,16 @@ public class Config {
             @Comment({"If a Sip item is Olive Oiled via the Rustic mod, it will slip from the player's hand when drunk with this probability (0.0-1.0)"})
             public float slipChance = 0.25f;
 
+            @Comment({"Enable compatibility with Nutrition."})
+            public boolean nutrition = true;
+
+            @Comment({"Assign nutrients to drinkable fluids here. Format: fluid_name, nutrient_name[, nutrient_name ...]"})
+            public String[] nutrients = new String[] {
+                    "mushroom_stew, vegetable",
+                    "nutrient_distillation, protein, fruit",
+            };
+
+
         }
 
     }
@@ -79,6 +89,10 @@ public class Config {
             } catch (Exception e) {
                 SipsMod.logger.error("Failed to initialize rustic compat", e);
             }
+        }
+
+        if(SipsConfig.compat.nutrition && Loader.isModLoaded("nutrition")) {
+            NutritionCompat.addNutrients();
         }
     }
 
