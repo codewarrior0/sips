@@ -65,6 +65,7 @@ public class Config {
             public String[] nutrients = new String[] {
                     "mushroom_stew, vegetable",
                     "nutrient_distillation, protein, fruit",
+                    "milk, dairy"
             };
 
 

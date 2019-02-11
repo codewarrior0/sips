@@ -47,6 +47,7 @@ public class NutritionCompat {
 
     public static void applyNutrition(EntityPlayer player, String fluidName, int shanks) {
         List<Nutrient> foundNutrients = getNutrients(fluidName);
+        if(fluidName.equals("milk") && shanks < 1) shanks = 1; // Nutrition considers a milk bucket as 4 shanks for nutrient purposes
         float nutritionValue = calculateNutrition(shanks, foundNutrients);
 
 
@@ -86,6 +87,8 @@ public class NutritionCompat {
         int shanks = 0;
         Sippable stats = Config.stats.get(fluidName);
         if (stats != null) shanks = stats.shanks;
+        if(fluidName.equals("milk") && shanks < 1) shanks = 1; // Nutrition considers a milk bucket as 4 shanks for nutrient purposes
+
 
         String nutrientString = stringJoiner.toString();
         float nutritionValue = calculateNutrition(shanks, foundNutrients);
