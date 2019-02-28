@@ -1,7 +1,6 @@
 package mod.codewarrior.sips;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -14,6 +13,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -21,8 +21,6 @@ import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
 import org.apache.commons.lang3.tuple.Pair;
@@ -44,14 +42,14 @@ public class SipsModel implements IModel {
 
     public final IModel baseModel;
 
-    Fluid fluid;
+    FluidStack fluid;
 
-    public SipsModel(ResourceLocation modelLoc, Fluid fluid) throws Exception {
+    public SipsModel(ResourceLocation modelLoc, FluidStack fluid) throws Exception {
         this.baseModel = ModelLoaderRegistry.getModel(modelLoc);
         this.fluid = fluid;
     }
 
-    public SipsModel(IModel baseModel, Fluid fluid) {
+    public SipsModel(IModel baseModel, FluidStack fluid) {
         this.baseModel = baseModel;
         this.fluid = fluid;
     }
@@ -61,31 +59,64 @@ public class SipsModel implements IModel {
         return new ImmutableList.Builder<ResourceLocation>().add(FLUID_EMPTY).addAll(baseModel.getTextures()).build();
     }
 
-    @Override
-    public IModel process(ImmutableMap<String, String> customData) {
-        String fluidName = customData.get("fluid");
-        Fluid fluid = FluidRegistry.getFluid(fluidName);
-        if (fluid == null) {
-            fluid = this.fluid;
-        }
-        return new SipsModel(baseModel, fluid);
-    }
+//    @Override
+//    public IModel process(ImmutableMap<String, String> customData) {
+//        String stackTag = customData.get("fluid");
+//        Fluid fluid = FluidRegistry.getFluid(fluidName);
+//        if (fluid == null) {
+//            fluid = this.fluid;
+//        }
+//        return new SipsModel(baseModel, fluid);
+//    }
 
     private static final float NORTH_Z_FLUID = 7.498f / 16f;
     private static final float SOUTH_Z_FLUID = 8.502f / 16f;
 
     @Override
     public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
-        TextureAtlasSprite fluidSprite = null;
+        TextureAtlasSprite fluidSprite = bakedTextureGetter.apply(fluid != null ? fluid.getFluid().getStill(fluid) : FLUID_EMPTY);
 
         ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
 
         IBakedModel base = this.baseModel.bake(state, format,
-                (loc) -> (loc.equals(FLUID_PLACEHOLDER)) ? bakedTextureGetter.apply(fluid != null ? fluid.getStill() : FLUID_EMPTY) : bakedTextureGetter.apply(loc));
+                (loc) -> (loc.equals(FLUID_PLACEHOLDER)) ? fluidSprite : bakedTextureGetter.apply(loc));
 
         builder.addAll(base.getQuads(null, null, 0));
+        ImmutableList<BakedQuad> quads = builder.build();
 
-        return new SipsBakedModel(this, base, state, builder.build(), fluidSprite, format);
+        if (fluid != null) {
+            int color = fluid.getFluid().getColor(fluid);
+            float cb = color & 0xFF;
+            float cg = (color >>> 8) & 0xFF;
+            float cr = (color >>> 16) & 0xFF;
+            float ca = (color >>> 24) & 0xFF;
+
+            for (BakedQuad quad : quads) {
+                // Borrowed from ForgeHooksClient#putQuadColor
+
+                if (quad.getSprite() == fluidSprite) {
+                    int verts[] = quad.getVertexData();
+                    int size = format.getIntegerSize();
+                    int offset = format.getColorOffset() / 4; // assumes that color is aligned
+
+                    for(int i = 0; i < 4; i++)
+                    {
+                        int vc = verts[offset + size * i];
+                        float vcr = vc & 0xFF;
+                        float vcg = (vc >>> 8) & 0xFF;
+                        float vcb = (vc >>> 16) & 0xFF;
+                        float vca = (vc >>> 24) & 0xFF;
+                        int ncr = Math.min(0xFF, (int)(cr * vcr / 0xFF));
+                        int ncg = Math.min(0xFF, (int)(cg * vcg / 0xFF));
+                        int ncb = Math.min(0xFF, (int)(cb * vcb / 0xFF));
+                        int nca = Math.min(0xFF, (int)(ca * vca / 0xFF));
+                        int c = ncr | ncg << 8 | ncb << 16 | nca << 24;
+                        verts[offset + size * i] = c;
+                    }
+                }
+            }
+        }
+        return new SipsBakedModel(this, base, state, quads, fluidSprite, format);
     }
 
     public static class SipsModelOverrideHandler extends ItemOverrideList {
@@ -106,23 +137,29 @@ public class SipsModel implements IModel {
                 return originalModel;
             }
 
-            SipsBakedModel model = (SipsBakedModel) originalModel;
+            SipsBakedModel bakedModel = (SipsBakedModel) originalModel;
+            SipsModel model = (SipsModel) bakedModel.parent;
 
-            Fluid fluid = fluidStack.getFluid();
-            String name = fluid.getName();
+            FluidStack sampleStack = fluidStack.copy();
+            sampleStack.amount = 1000;
 
-            if (!model.cache.containsKey(name)) {
-                IModel parent = model.parent.process(ImmutableMap.of("fluid", name));
+            NBTTagCompound tag = new NBTTagCompound();
+            sampleStack.writeToNBT(tag);
+            String stackTag = tag.toString();
+
+            if (!bakedModel.cache.containsKey(stackTag)) {
+                //IModel parent = model.parent.process(ImmutableMap.of("fluid", stackTag));
+                IModel newModel = new SipsModel(model.baseModel, sampleStack);
                 Function<ResourceLocation, TextureAtlasSprite> textureGetter;
                 textureGetter = location -> Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
 
-                IBakedModel bakedModel = parent.bake(model.state, model.format, textureGetter);
+                IBakedModel newBakedModel = newModel.bake(bakedModel.state, bakedModel.format, textureGetter);
 
-                model.cache.put(name, bakedModel);
-                return bakedModel;
+                bakedModel.cache.put(stackTag, newBakedModel);
+                return newBakedModel;
             }
 
-            return model.cache.get(name);
+            return bakedModel.cache.get(stackTag);
         }
     }
 
