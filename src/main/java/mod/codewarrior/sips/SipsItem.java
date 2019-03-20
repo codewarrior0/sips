@@ -75,7 +75,7 @@ public class SipsItem extends ItemFood {
             int sips = fs.amount / SIP;
             list.add(rarity+fs.getLocalizedName()+TextFormatting.GRAY+": " + I18n.format("desc.sips.sips", sips) + " (" +fs.amount+"/"+ maxCapacity +"mB" + ")");
 
-            if (SipsConfig.compat.nutrition) {
+            if (Config.nutritionEnabled()) {
                 NutritionCompat.addStackInformation(fs.getFluid().getName(), list);
             }
         }
@@ -268,7 +268,7 @@ public class SipsItem extends ItemFood {
             }
         }
 
-        if (SipsConfig.compat.nutrition) {
+        if (Config.nutritionEnabled()) {
             try {
                 NutritionCompat.applyNutrition(player, fluidName, shanks);
             } catch (Exception e) {

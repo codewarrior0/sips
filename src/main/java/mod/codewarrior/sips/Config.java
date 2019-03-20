@@ -92,9 +92,13 @@ public class Config {
             }
         }
 
-        if(SipsConfig.compat.nutrition && Loader.isModLoaded("nutrition")) {
+        if(nutritionEnabled()) {
             NutritionCompat.addNutrients();
         }
+    }
+
+    public static boolean nutritionEnabled() {
+        return SipsConfig.compat.nutrition && Loader.isModLoaded("nutrition");
     }
 
     public static void addThermalFluids() {
