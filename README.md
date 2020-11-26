@@ -1,7 +1,7 @@
 # Sips
 A Minecraft Mod that adds small fluid containers you can drink from!
 <br>
-[**CF project**](<https://www.curseforge.com/minecraft/mc-mods/sips>) / [**Demo Website**](<https://yoghurt4c.github.io/Sips/index.html>)
+[**CF project**](<https://www.curseforge.com/minecraft/mc-mods/sips>) / [**Demo Website**](<https://yoghurt4c.github.io/sips/>)
 <p align="center">
 <a href="https://github.com/Yoghurt4C/Sips/blob/fabric-1.16/LICENSE.md"><img src="https://github.com/Yoghurt4C/Sips/blob/fabric-1.16/docs/sips/icon.png" alt="" width=250 height=250></a>
 <br>
