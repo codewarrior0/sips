@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "sips:milk",
+    "sips:flowing_milk",
+    "sips:mushroom_stew",
+    "sips:flowing_mushroom_stew"
+  ]
+}

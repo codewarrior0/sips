@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "SNS",
+    " S "
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:lapis_lazuli"
+    },
+    "N": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "item": "sips:lil_sip"
+  }
+}

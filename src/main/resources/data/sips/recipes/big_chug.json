@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SGS",
+    "NDN",
+    "NNN"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:iron_ingot"
+    },
+    "N": {
+      "item": "minecraft:bucket"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "G": {
+      "item": "minecraft:gray_dye"
+    }
+  },
+  "result": {
+    "item": "sips:big_chug"
+  }
+}

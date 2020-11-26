@@ -1,0 +1,296 @@
+{
+  "minecraft:water": {
+    "effects": {
+      "sips:thermodynamics": {
+        "duration": "1t",
+        "showParticles": false,
+        "showIcon": false
+      }
+    }
+  },
+  "minecraft:lava": {
+    "damage": 4,
+    "effects": {
+      "sips:lava_digestion": {
+        "duration": "1m"
+      }
+    }
+  },
+  "#c:milk": {
+    "damage": -1,
+    "effects": {
+      "sips:purge": {
+        "duration": "1t",
+        "showParticles": false,
+        "showIcon": false
+      }
+    }
+  },
+  "#c:mushroom_stew": {
+    "hunger": 6,
+    "saturation": 0.3
+  },
+  "techreborn:helium": {
+    "damage": 1,
+    "effects": {
+      "levitation": {
+        "duration": "10s",
+        "level": 4
+      }
+    }
+  },
+  "techreborn:nitro_diesel": {
+    "damage": 5,
+    "effects": {
+      "speed": {
+        "duration": "30s",
+        "level": 1
+      },
+      "haste": {
+        "duration": "30s",
+        "level": 1
+      }
+    }
+  },
+  "techreborn:nitrofuel": {
+    "damage": 4,
+    "effects": {
+      "speed": {
+        "duration": "30s"
+      },
+      "haste": {
+        "duration": "30s"
+      }
+    }
+  },
+  "techreborn:mercury": {
+    "effects": {
+      "poison": {
+        "duration": "1h"
+      },
+      "luck": {
+        "duration": "10s"
+      }
+    }
+  },
+  "techreborn:biofuel": {
+    "damage": -1,
+    "effects": {
+      "slowness": {
+        "duration": "20s",
+        "level": 4
+      },
+      "resistance": {
+        "duration": "20s",
+        "level": 3
+      }
+    }
+  },
+  "techreborn:electrolyzed_water": {
+    "effects": {
+      "haste": {
+        "duration": "5s",
+        "level": 5
+      },
+      "weakness": {
+        "duration": "15s",
+        "level": 2
+      },
+      "unluck": {
+        "duration": "15s"
+      }
+    }
+  },
+  "techreborn:methane": {
+    "effects": {
+      "strength": {
+        "duration": "20s",
+        "level": 4
+      },
+      "speed": {
+        "duration": "20s",
+        "level": 4
+      },
+      "night_vision": {
+        "duration": "20s",
+        "level": 1
+      },
+      "weakness": {
+        "duration": "2m"
+      },
+      "slowness": {
+        "duration": "2m"
+      },
+      "blindness": {
+        "duration": "2m"
+      }
+    }
+  },
+  "techreborn:oil": {
+    "hunger": 1,
+    "saturation": 0.1,
+    "damage": 1,
+    "effects": {
+      "slowness": {
+        "duration": "20s",
+        "level": 1
+      },
+      "mining_fatigue": {
+        "duration": "20s",
+        "level": 1
+      },
+      "hunger": {
+        "duration": "5s",
+        "level": 1
+      },
+      "luck": {
+        "duration": "3s",
+        "level": 3
+      }
+    }
+  },
+  "techreborn:calcium": {
+    "effects": {
+      "absorption": {
+        "duration": "1m"
+      },
+      "resistance": {
+        "duration": "1m"
+      },
+      "hunger": {
+        "duration": "5s",
+        "level": 1
+      }
+    }
+  },
+  "techreborn:compressed_air": {
+    "effects": {
+      "water_breathing": {
+        "duration": "20s",
+        "level": 4
+      },
+      "mining_fatigue": {
+        "duration": "5s"
+      }
+    }
+  },
+  "modern_industrialization:raw_rubber": {
+    "effects": {
+      "resistance": {
+        "duration": "20s",
+        "level": 2
+      },
+      "absorption": {
+        "duration": "20s"
+      },
+      "weakness": {
+        "duration": "20s"
+      },
+      "hunger": {
+        "duration": "5s",
+        "level": 1
+      }
+    }
+  },
+  "modern_industrialization:chlorine": {
+    "damage": 5,
+    "effects": {
+      "blindness": {
+        "duration": "30s"
+      },
+      "nausea": {
+        "duration": "10s"
+      },
+      "slowness": {
+        "duration": "10s"
+      },
+      "strength": {
+        "duration": "10s"
+      }
+    }
+  },
+  "modern_industrialization:air": {
+    "effects": {
+      "water_breathing": {
+        "duration": "20s"
+      }
+    }
+  },
+  "astromine:gasoline": {
+    "damage": 3,
+    "effects": {
+      "strength": {
+        "duration": "15s",
+        "level": 1
+      },
+      "nausea": {
+        "duration": "4s",
+        "level": 3
+      }
+    }
+  },
+  "crude_oil": {
+    "hunger": 1,
+    "saturation": 0.1,
+    "damage": 1,
+    "effects": {
+      "slowness": {
+        "duration": "20s",
+        "level": 1
+      },
+      "mining_fatigue": {
+        "duration": "20s",
+        "level": 1
+      },
+      "hunger": {
+        "duration": "5s",
+        "level": 1
+      },
+      "luck": {
+        "duration": "3s",
+        "level": 3
+      }
+    }
+  },
+  "diesel": {
+    "damage": 3,
+    "effects": {
+      "strength": {
+        "duration": "15s",
+        "level": 1
+      },
+      "nausea": {
+        "duration": "4s",
+        "level": 3
+      }
+    }
+  },
+  "sulfuric_acid": {
+    "damage": 10,
+    "effects": {
+      "poison": {
+        "duration": "1m",
+        "level": 10
+      },
+      "slowness": {
+        "duration": "10s",
+        "level": 10
+      },
+      "luck": {
+        "duration": "19t",
+        "level": 10
+      }
+    }
+  },
+  "oxygen": {
+    "effects": {
+      "water_breathing": {
+        "duration": "20s",
+        "level": 4
+      },
+      "mining_fatigue": {
+        "duration": "5s"
+      }
+    }
+  }
+}

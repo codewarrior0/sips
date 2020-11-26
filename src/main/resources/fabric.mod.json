@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "sips",
+  "version": "${version}",
+  "name": "Sips",
+  "description": "Drink.",
+  "authors": [
+    "codewarrior0",
+    "Yoghurt4C"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/sips",
+    "sources": "https://github.com/codewarrior0/sips"
+  },
+  "license": "MMPL-J 1.0",
+  "icon": "assets/sips/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "mod.codewarrior.sips.SipsMod"
+    ],
+    "client": [
+      "mod.codewarrior.sips.client.SipsClient"
+    ],
+    "rei_plugins_v0": [
+      "mod.codewarrior.sips.compat.rei.SipsREIPlugin"
+    ]
+  },
+  "mixins": [
+    "sips.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "libblockattributes": ">=0.8.4",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}

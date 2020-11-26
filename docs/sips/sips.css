@@ -1,0 +1,13 @@
+img { height: auto; max-width: 90%; }
+
+body { text-align: center; background-color: #36393E; color: #DCDDDE; }
+
+.code { background-color: #2F3136; font: monospace; }
+
+.spoiler { color: black; background-color: black; }
+
+strong { color: white; }
+
+.spoiler:hover { background-color: #36393E; color: #DCDDDE; }
+
+hr { background: url(sipsborder.png); border: none; height: 32px; }

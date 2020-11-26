@@ -1,0 +1,25 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "sips:item/big_chug"
+  },
+  "display": {
+    "head": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        13,
+        7
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  }
+}
