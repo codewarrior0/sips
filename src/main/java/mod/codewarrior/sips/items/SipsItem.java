@@ -162,6 +162,7 @@ public class SipsItem extends Item implements AttributeProviderItem {
     }
 
     private boolean attemptFill(World world, PlayerEntity user, ItemStack stack) {
+        if (FluidUtil.getAmount(stack) >= maxCapacity) return false;
         BlockHitResult rtr = raycast(world, user, RaycastContext.FluidHandling.SOURCE_ONLY);
         if (rtr.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = rtr.getBlockPos();

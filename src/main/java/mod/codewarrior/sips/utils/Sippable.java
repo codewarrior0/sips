@@ -32,7 +32,11 @@ public class Sippable {
 
     public List<Effect> effects = new ArrayList<>();
 
-    public Sippable() { /*override onSipped()*/ }
+    /**
+     * You can use either of these 3 constructors, depending on which values you want to change;
+     * The empty one is mainly for overriding {@link Sippable#onSipped(FluidKey, World, PlayerEntity)}
+     */
+    public Sippable() {}
 
     public Sippable(int shanks, float saturation, float damage) {
         this.shanks = shanks;
@@ -116,6 +120,11 @@ public class Sippable {
         }
     }
 
+    /**
+     * Queries the TagRegistry for a specified tag, then registers the given Sippable for all of its values.
+     * @param id the target Tag Identifier
+     * @param sippable Sippable object shared between the Tag's values
+     */
     public static void fromTag(Identifier id, Sippable sippable) {
         Tag<Fluid> tag = ServerTagManagerHolder.getTagManager().getFluids().getTag(id);
         if (tag != null && !tag.values().isEmpty()) {
@@ -128,6 +137,11 @@ public class Sippable {
         }
     }
 
+    /**
+     * Loops the registry using the given predicate, and registers the given Sippable for any match.
+     * @param predicate "id" of the target fluid(s)
+     * @param sippable Sippable object shared between them
+     */
     public static void fromPredicate(String predicate, Sippable sippable) {
         Registry.FLUID.forEach(fluid -> {
             if (Registry.FLUID.getId(fluid).getPath().equals(predicate)) {
@@ -218,9 +232,11 @@ public class Sippable {
         return new Effect(name, duration, level, showParticles, showIcon);
     }
 
-    public void onSipped(FluidKey drank, World world, PlayerEntity player) {
-
-    }
+    /**
+     * Override this method to add custom effects to your Sippable without using StatusEffects
+     * Keep in mind that, for the time being, this only gets called serverside in SMP.
+     */
+    public void onSipped(FluidKey drank, World world, PlayerEntity player) {}
 
     public static class Effect {
         Identifier name;

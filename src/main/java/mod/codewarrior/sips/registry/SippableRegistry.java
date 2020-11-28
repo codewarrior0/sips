@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mod.codewarrior.sips.SipsMod;
 import mod.codewarrior.sips.config.SipsConfig;
 import mod.codewarrior.sips.utils.Sippable;
+import mod.codewarrior.sips.utils.SippableRegistryCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 import net.minecraft.entity.player.PlayerEntity;
@@ -84,15 +85,7 @@ public class SippableRegistry {
                     }
                 });
 
-                //manual
-                if (SipsConfig.liquidXpHasEffect()) {
-                    Sippable.fromPredicate("liquid_xp", new Sippable() {
-                        @Override
-                        public void onSipped(FluidKey drank, World world, PlayerEntity player) {
-                            player.addExperience(7 + world.random.nextInt(5));
-                        }
-                    });
-                }
+                SippableRegistryCallback.EVENT.invoker().registerSippable();
             }, executor);
         }
     }

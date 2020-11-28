@@ -1,5 +1,9 @@
 package mod.codewarrior.sips.registry;
 
+import alexiil.mc.lib.attributes.fluid.volume.FluidKey;
+import mod.codewarrior.sips.config.SipsConfig;
+import mod.codewarrior.sips.utils.Sippable;
+import mod.codewarrior.sips.utils.SippableRegistryCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,6 +17,17 @@ import net.minecraft.world.World;
 
 public class SipsEvents {
     public static void init() {
+        SippableRegistryCallback.EVENT.register(() -> {
+            if (SipsConfig.liquidXpHasEffect()) {
+                Sippable.fromPredicate("liquid_xp", new Sippable() {
+                    @Override
+                    public void onSipped(FluidKey drank, World world, PlayerEntity player) {
+                        player.addExperience(7 + world.random.nextInt(5));
+                    }
+                });
+            }
+        });
+
         UseBlockCallback.EVENT.register(((player, world, hand, rtr) -> {
             ItemStack stack = player.getStackInHand(hand);
             BlockPos pos = rtr.getBlockPos().offset(rtr.getSide());
